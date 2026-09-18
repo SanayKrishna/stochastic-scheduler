@@ -22,6 +22,11 @@ cp .env.example .env   # put your GEMINI_API_KEY in there
 python app.py
 ```
 
+Get a key at https://aistudio.google.com/apikey (it starts with `AIza...`).
+Without it the app still runs, but section 04 shows a setup hint instead of
+AI text. OAuth-style tokens starting with `AQ.` are not API keys and will be
+rejected. `GOOGLE_API_KEY` works as a fallback variable name.
+
 Open http://127.0.0.1:5000, drop `sample_input.json` or paste JSON, set simulations (1000-50000), Run Simulation.
 
 Tests: `python -m pytest tests/ -q`

@@ -11,6 +11,8 @@ load_dotenv()
 
 LOG_PATH = Path(__file__).parent / "logs" / "ai_debug.log"
 
+PLACEHOLDERS = {"", "your_gemini_key_here", "changeme", "xxx", "none", "null"}
+
 
 def _log(prompt, raw):
     try:
@@ -23,6 +25,20 @@ def _log(prompt, raw):
             f.write(str(raw) + "\n")
     except OSError:
         pass
+
+
+def get_api_key():
+    """Read the key from the environment. Accepts GEMINI_API_KEY or GOOGLE_API_KEY.
+
+    Returns "" when no usable key is configured (missing .env, blank value,
+    or the placeholder from .env.example left unfilled).
+    """
+    for var in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
+        raw = os.getenv(var, "")
+        key = raw.strip().strip("\"'")
+        if key.lower() not in PLACEHOLDERS:
+            return key
+    return ""
 
 
 def build_prompt(results):
@@ -67,19 +83,28 @@ def _extract_json(text):
     return json.loads(text)
 
 
+def _unavailable(reason, message):
+    return {
+        "available": False,
+        "reason": reason,
+        "message": message,
+        "summary": None,
+        "mitigations": [],
+        "recommended_buffer_days": None,
+    }
+
+
 def interpret_results(results):
     prompt = build_prompt(results)
-    api_key = os.getenv("GEMINI_API_KEY", "")
+    api_key = get_api_key()
 
     if not api_key:
         _log(prompt, "MISSING GEMINI_API_KEY")
-        return {
-            "available": False,
-            "message": "AI interpretation unavailable (missing API key).",
-            "summary": None,
-            "mitigations": [],
-            "recommended_buffer_days": None,
-        }
+        return _unavailable(
+            "missing",
+            "No Gemini API key found. Copy .env.example to .env and set "
+            "GEMINI_API_KEY to a key from Google AI Studio.",
+        )
 
     try:
         from google import genai
@@ -92,20 +117,36 @@ def interpret_results(results):
         )
         raw = getattr(resp, "text", str(resp))
         _log(prompt, raw)
+    except Exception as e:
+        _log(prompt, f"ERROR: {e!r}")
+        text = repr(e).lower()
+        if any(s in text for s in ("401", "403", "api_key_invalid", "invalid api key",
+                                   "permission_denied", "unauthenticated")):
+            return _unavailable(
+                "auth",
+                "The Gemini API key was rejected. Check that GEMINI_API_KEY in "
+                ".env is a valid key from Google AI Studio.",
+            )
+        return _unavailable(
+            "error",
+            "AI interpretation unavailable (API call failed). "
+            "Showing simulation results only.",
+        )
+
+    try:
         parsed = _extract_json(raw)
         return {
             "available": True,
+            "reason": None,
             "message": None,
             "summary": str(parsed.get("summary", "")),
             "mitigations": parsed.get("mitigations", [])[:3],
             "recommended_buffer_days": parsed.get("recommended_buffer_days"),
         }
     except Exception as e:
-        _log(prompt, f"ERROR: {e!r}")
-        return {
-            "available": False,
-            "message": "AI interpretation unavailable. Showing simulation results only.",
-            "summary": None,
-            "mitigations": [],
-            "recommended_buffer_days": None,
-        }
+        _log(prompt, f"PARSE ERROR: {e!r} / RAW WAS: {raw}")
+        return _unavailable(
+            "parse",
+            "AI interpretation unavailable (unparseable response). "
+            "Showing simulation results only.",
+        )
