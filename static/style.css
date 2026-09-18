@@ -24,16 +24,8 @@ body {
   line-height: 1.55;
 }
 
-.topbar { border-bottom: 1px solid var(--line); background: var(--paper); }
-.topbar-inner {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding-top: 10px; padding-bottom: 10px;
-}
-.brand { font-weight: 600; font-size: 13px; letter-spacing: 0.02em; }
-.meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-
 .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
-main.wrap { padding-top: 32px; padding-bottom: 56px; }
+main.wrap { padding-top: 44px; padding-bottom: 56px; }
 
 h1 { font-size: 28px; line-height: 1.2; letter-spacing: -0.015em; margin: 0 0 6px; font-weight: 650; }
 .sub { color: var(--muted); margin: 0 0 24px; max-width: 60ch; font-size: 14px; }
