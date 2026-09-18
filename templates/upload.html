@@ -3,63 +3,103 @@
 <h1>Analyze a schedule.</h1>
 <p class="sub">Upload three-point estimates. The tool runs a PERT Monte Carlo and reports where completion actually lands.</p>
 
+<ol class="steps" aria-label="Progress">
+  <li class="on">1&ensp;Input</li>
+  <li>2&ensp;Runs</li>
+  <li>3&ensp;Review</li>
+</ol>
+
 {% if error %}<div class="err">{{ error }}</div>{% endif %}
 
 <form id="simform" class="card" method="post" action="/analyze" enctype="multipart/form-data">
-  <div class="seg" role="tablist">
-    <button type="button" id="tab-file" class="on">File</button>
-    <button type="button" id="tab-paste">Paste JSON</button>
-  </div>
-
-  <div id="pane-file">
-    <label class="drop" id="drop">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="1.6"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>
-      <div>
-        <strong id="drop-label">Drop input.json here</strong>
-        <span>or click to browse. Must match the expected schema.</span>
+  <div class="work">
+    <div class="work-main">
+      <div class="seg" role="tablist" aria-label="Input source">
+        <button type="button" id="tab-file" class="on">File</button>
+        <button type="button" id="tab-paste">Paste JSON</button>
       </div>
-      <input type="file" id="file" name="file" accept=".json,application/json">
-    </label>
-  </div>
 
-  <div id="pane-paste" hidden>
-    <textarea class="json" name="json_text" id="json_text" spellcheck="false" placeholder='{"project_name": "...", "tasks": [...]}'></textarea>
-  </div>
+      <div id="pane-file">
+        <label class="drop" id="drop">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="1.6"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>
+          <div>
+            <strong id="drop-label">Drop input.json here</strong>
+            <span>or click to browse. Must match the expected schema.</span>
+          </div>
+          <input type="file" id="file" name="file" accept=".json,application/json">
+        </label>
+        <p class="filemeta" id="filemeta" hidden></p>
+      </div>
 
-  <div class="row">
-    <div class="field">
-      <label for="simulations">Simulations</label>
-      <input id="simulations" name="simulations" type="number" value="10000" min="1000" max="50000" step="1000">
+      <div id="pane-paste" hidden>
+        <textarea class="json" name="json_text" id="json_text" spellcheck="false" placeholder='{"project_name": "...", "tasks": [...]}'></textarea>
+        <p class="hint">Or start from the bundled example instead of typing from scratch.</p>
+      </div>
     </div>
-    <div>
-      <button class="btn" id="runbtn" type="submit"><span class="spin"></span><span id="runlabel">Run Simulation</span></button>
-    </div>
-  </div>
 
-  <details class="ex">
-    <summary>See example JSON</summary>
-    <pre>{{ example }}</pre>
-  </details>
+    <aside class="rail">
+      <div class="field">
+        <label for="simulations">Simulations</label>
+        <input id="simulations" name="simulations" type="number" value="10000" min="1000" max="50000" step="1000">
+      </div>
+      <button class="btn wide" id="runbtn" type="submit"><span class="spin"></span><span id="runlabel">Run Simulation</span></button>
+      <button class="btn ghost wide" type="button" id="loadsample">Load sample</button>
+      <p class="hint">File wins if both are given. 1000 to 50000 runs.</p>
+    </aside>
+  </div>
 </form>
+
+<details class="ex">
+  <summary>See example JSON</summary>
+  <pre id="example-json">{{ example }}</pre>
+</details>
 
 <script>
 const tabFile = document.getElementById('tab-file');
 const tabPaste = document.getElementById('tab-paste');
 const paneFile = document.getElementById('pane-file');
 const panePaste = document.getElementById('pane-paste');
-tabFile.onclick = () => { tabFile.classList.add('on'); tabPaste.classList.remove('on'); paneFile.hidden = false; panePaste.hidden = true; };
-tabPaste.onclick = () => { tabPaste.classList.add('on'); tabFile.classList.remove('on'); panePaste.hidden = false; paneFile.hidden = true; };
+function showFile() { tabFile.classList.add('on'); tabPaste.classList.remove('on'); paneFile.hidden = false; panePaste.hidden = true; }
+function showPaste() { tabPaste.classList.add('on'); tabFile.classList.remove('on'); panePaste.hidden = false; paneFile.hidden = true; }
+tabFile.onclick = showFile;
+tabPaste.onclick = showPaste;
 
 const drop = document.getElementById('drop');
 const file = document.getElementById('file');
 const label = document.getElementById('drop-label');
+const meta = document.getElementById('filemeta');
+
+function describeFile(f) {
+  label.textContent = f.name;
+  const kb = (f.size / 1024).toFixed(1);
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const n = Array.isArray(data.tasks) ? data.tasks.length : 0;
+      const name = data.project_name || 'untitled';
+      meta.textContent = `${name} · ${n} tasks · ${kb} KB · looks like valid JSON`;
+    } catch {
+      meta.textContent = `${f.name} · ${kb} KB · not valid JSON yet`;
+    }
+    meta.hidden = false;
+  };
+  reader.readAsText(f);
+}
 drop.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') file.click(); });
 ['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
 drop.addEventListener('drop', (e) => {
-  if (e.dataTransfer.files.length) { file.files = e.dataTransfer.files; label.textContent = e.dataTransfer.files[0].name; }
+  if (e.dataTransfer.files.length) { file.files = e.dataTransfer.files; describeFile(e.dataTransfer.files[0]); }
 });
-file.addEventListener('change', () => { if (file.files.length) label.textContent = file.files[0].name; });
+file.addEventListener('change', () => { if (file.files.length) describeFile(file.files[0]); });
+
+document.getElementById('loadsample').addEventListener('click', () => {
+  const ex = document.getElementById('example-json').textContent;
+  document.getElementById('json_text').value = ex.trim() + '\n';
+  showPaste();
+  document.getElementById('json_text').focus();
+});
 
 document.getElementById('simform').addEventListener('submit', () => {
   const btn = document.getElementById('runbtn');
