@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Check if your deadline survives contact with reality.</h1>
-<p class="sub">Drop in three-point estimates. We run 10,000 PERT Monte Carlos and show where the schedule actually lands.</p>
+<h1>Analyze a schedule.</h1>
+<p class="sub">Upload three-point estimates. The tool runs a PERT Monte Carlo and reports where completion actually lands.</p>
 
 {% if error %}<div class="err">{{ error }}</div>{% endif %}
 
@@ -13,7 +13,7 @@
 
   <div id="pane-file">
     <label class="drop" id="drop">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D7377" stroke-width="1.8"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="1.6"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>
       <div>
         <strong id="drop-label">Drop input.json here</strong>
         <span>or click to browse. Must match the expected schema.</span>

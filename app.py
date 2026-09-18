@@ -62,11 +62,11 @@ def build_chart(results):
     x_sorted = np.sort(comps)
     cum = np.arange(1, len(x_sorted) + 1) / len(x_sorted) * 100
 
-    accent = "#0D7377"
+    accent = "#4338CA"
     fig = go.Figure()
     fig.add_trace(go.Histogram(
         x=comps, nbinsx=40, name="Outcomes",
-        marker_color=accent, opacity=0.55,
+        marker_color=accent, opacity=0.45,
         hovertemplate="days: %{x:.1f}<br>count: %{y}<extra></extra>",
     ))
     fig.add_trace(go.Scatter(

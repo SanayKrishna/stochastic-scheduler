@@ -3,6 +3,9 @@
 {% block content %}
 <h1>{{ results.project_name }}</h1>
 <p class="projline">target {{ results.target_completion_days }}d{% if results.project_start_date %} &middot; start {{ results.project_start_date }}{% endif %} &middot; {{ results.simulations }} runs</p>
+{% if results.prob_on_time is not none %}
+<p class="verdict"><strong>{{ "%.0f"|format(results.prob_on_time) }}% on-time</strong> vs {{ results.target_completion_days }}d target. Plan to {{ "%.1f"|format(results.p80) }}d for 80% confidence.</p>
+{% endif %}
 
 <h2 class="sec"><span class="n">01</span>Summary</h2>
 <div class="strip">
