@@ -12,6 +12,7 @@ venv/
 logs/
 *.log
 ai_debug.log
+.pytest_cache/
 
 # os
 .DS_Store
