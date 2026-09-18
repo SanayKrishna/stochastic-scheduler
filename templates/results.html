@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ results.project_name }} — results{% endblock %}
+{% block content %}
+<h1>{{ results.project_name }}</h1>
+<p class="projline">target {{ results.target_completion_days }}d{% if results.project_start_date %} &middot; start {{ results.project_start_date }}{% endif %} &middot; {{ results.simulations }} runs</p>
+
+<h2 class="sec"><span class="n">01</span>Summary</h2>
+<div class="strip">
+  <div class="stat">
+    <div class="k">P50 median</div>
+    <div class="v">{{ "%.1f"|format(results.p50) }}d</div>
+    <div class="d">{% if dates.p50 %}{{ dates.p50 }}{% else %}50% land here or earlier{% endif %}</div>
+  </div>
+  <div class="stat">
+    <div class="k">P80 confident</div>
+    <div class="v">{{ "%.1f"|format(results.p80) }}d</div>
+    <div class="d">{% if dates.p80 %}{{ dates.p80 }}{% else %}80% land here or earlier{% endif %}</div>
+  </div>
+  <div class="stat">
+    <div class="k">P95 cautious</div>
+    <div class="v">{{ "%.1f"|format(results.p95) }}d</div>
+    <div class="d">{% if dates.p95 %}{{ dates.p95 }}{% else %}95% land here or earlier{% endif %}</div>
+  </div>
+  <div class="stat">
+    <div class="k">On-time chance</div>
+    {% set p = results.prob_on_time %}
+    {% set cls = "prob-green" if p is not none and p >= 70 else ("prob-amber" if p is not none and p >= 40 else "prob-red") %}
+    <div class="v {{ cls }}">{% if p is not none %}<span class="dot"></span>{{ "%.0f"|format(p) }}%{% else %}—{% endif %}</div>
+    <div class="d">vs {{ results.target_completion_days }}d target</div>
+  </div>
+</div>
+
+<h2 class="sec"><span class="n">02</span>Distribution</h2>
+<div class="chartbox">{{ chart_div|safe }}</div>
+
+<h2 class="sec"><span class="n">03</span>Risk drivers</h2>
+<div class="tablewrap">
+<table>
+  <tr><th>Task</th><th class="num">O / M / P</th><th class="num">Mean</th><th class="num">Corr</th><th style="width:28%">Risk</th></tr>
+  {% for t in results.risk_drivers %}
+  <tr>
+    <td>{{ t.id }} — {{ t.name }}</td>
+    <td class="num">{{ t.optimistic|int }} / {{ t.most_likely|int }} / {{ t.pessimistic|int }}</td>
+    <td class="num">{{ "%.1f"|format(t.sim_mean) }}d</td>
+    <td class="num">{{ "%.2f"|format(t.risk_contribution) }}</td>
+    <td><div class="bar"><i style="width:{{ (t.risk_contribution * 100)|round(1) }}%"></i></div></td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+
+<h2 class="sec"><span class="n">04</span>What this means</h2>
+{% if ai.available %}
+  <p>{{ ai.summary }}</p>
+  {% if ai.mitigations %}
+  <ol class="mit">
+    {% for m in ai.mitigations %}
+    <li><strong>{{ m.task_id }} — {{ m.task_name }}:</strong> {{ m.suggestion }}</li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+  {% if ai.recommended_buffer_days is not none %}
+  <div class="callout">Add about <strong>{{ ai.recommended_buffer_days }} days</strong> on top of P50 to plan at ~80% confidence.</div>
+  {% endif %}
+{% else %}
+  <div class="ai-fallback">{{ ai.message }}</div>
+{% endif %}
+
+<h2 class="sec"><span class="n">05</span>All tasks</h2>
+<div class="tablewrap">
+<table>
+  <tr><th>Task</th><th class="num">O</th><th class="num">M</th><th class="num">P</th><th class="num">PERT mean</th><th class="num">Sim mean</th><th class="num">Sim std</th></tr>
+  {% for t in results.task_stats %}
+  <tr>
+    <td>{{ t.id }} — {{ t.name }}</td>
+    <td class="num">{{ t.optimistic|int }}</td>
+    <td class="num">{{ t.most_likely|int }}</td>
+    <td class="num">{{ t.pessimistic|int }}</td>
+    <td class="num">{{ "%.2f"|format(t.pert_mean) }}</td>
+    <td class="num">{{ "%.2f"|format(t.sim_mean) }}</td>
+    <td class="num">{{ "%.2f"|format(t.sim_std) }}</td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+
+<div style="margin-top:32px">
+  <a href="/"><button class="btn ghost" type="button">Analyze Another Schedule</button></a>
+</div>
+{% endblock %}
