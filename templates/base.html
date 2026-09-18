@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Schedule Risk Analyzer{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">Schedule Risk Analyzer</div>
+    <div class="meta">Monte Carlo &middot; PERT</div>
+  </div>
+</header>
+<main class="wrap">
+  {% block content %}{% endblock %}
+  <footer class="foot">Local tool. Simulation is exact, AI text is advisory.</footer>
+</main>
+</body>
+</html>
