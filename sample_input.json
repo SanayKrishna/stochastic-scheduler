@@ -1,0 +1,18 @@
+{
+  "project_name": "Mobile Banking App",
+  "project_start_date": "2026-09-15",
+  "target_completion_days": 45,
+  "simulations": 10000,
+  "tasks": [
+    { "id": "T1", "name": "Requirements & Scoping", "optimistic": 3, "most_likely": 5, "pessimistic": 10, "dependencies": [], "resource_units": 2 },
+    { "id": "T2", "name": "System Architecture", "optimistic": 4, "most_likely": 6, "pessimistic": 14, "dependencies": ["T1"], "resource_units": 3 },
+    { "id": "T3", "name": "Database Design", "optimistic": 2, "most_likely": 4, "pessimistic": 8, "dependencies": ["T1"], "resource_units": 2 },
+    { "id": "T4", "name": "Authentication Module", "optimistic": 4, "most_likely": 7, "pessimistic": 16, "dependencies": ["T2"], "resource_units": 3 },
+    { "id": "T5", "name": "Core Banking API", "optimistic": 6, "most_likely": 10, "pessimistic": 20, "dependencies": ["T2", "T3"], "resource_units": 4 },
+    { "id": "T6", "name": "Mobile Frontend", "optimistic": 5, "most_likely": 8, "pessimistic": 15, "dependencies": ["T2"], "resource_units": 3 },
+    { "id": "T7", "name": "Payment Gateway Integration", "optimistic": 3, "most_likely": 6, "pessimistic": 14, "dependencies": ["T5"], "resource_units": 3 },
+    { "id": "T8", "name": "Security Audit", "optimistic": 3, "most_likely": 5, "pessimistic": 12, "dependencies": ["T4", "T7"], "resource_units": 2 },
+    { "id": "T9", "name": "Integration Testing", "optimistic": 4, "most_likely": 7, "pessimistic": 16, "dependencies": ["T6", "T7"], "resource_units": 3 },
+    { "id": "T10", "name": "UAT & Sign-off", "optimistic": 3, "most_likely": 5, "pessimistic": 10, "dependencies": ["T8", "T9"], "resource_units": 2 }
+  ]
+}
