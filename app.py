@@ -134,4 +134,8 @@ def analyze():
 
 
 if __name__ == "__main__":
+    from ai_interpreter import get_api_key
+    if not get_api_key():
+        print("NOTE: no GEMINI_API_KEY found (.env missing or blank).")
+        print("The app will run, but section 04 will show a setup hint, not AI text.")
     app.run(debug=True)

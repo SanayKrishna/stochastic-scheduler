@@ -7,7 +7,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).parent / ".env")
 
 LOG_PATH = Path(__file__).parent / "logs" / "ai_debug.log"
 
@@ -34,8 +34,10 @@ def get_api_key():
     or the placeholder from .env.example left unfilled).
     """
     for var in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
-        raw = os.getenv(var, "")
-        key = raw.strip().strip("\"'")
+        raw = os.getenv(var, "").strip()
+        if raw.lower().startswith("export "):
+            raw = raw[7:].strip()
+        key = raw.strip("\"'")
         if key.lower() not in PLACEHOLDERS:
             return key
     return ""
