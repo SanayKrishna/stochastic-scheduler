@@ -12,7 +12,7 @@ Mean per task is `(O + 4M + P) / 6`. Sampling fits a Beta scaled to `[O, P]` wit
 
 ## Where AI is used (and where it is not)
 
-`simulation_engine.py` is pure math, no AI, no Flask. `ai_interpreter.py` is the only module that calls Gemini. It sends P50/P80/P95, on-time chance, the P95-P50 gap, and the top 5 drivers with O/M/P and correlation, and asks for JSON back: a short summary, 3 task-specific mitigations tied to each spread, and a buffer for ~80% confidence. If the key is missing, the call times out, or the JSON does not parse, the page still renders everything else with an "AI interpretation unavailable" note. Prompt and raw response go to `logs/ai_debug.log` for the writeup.
+`simulation_engine.py` is pure math, no AI, no Flask. `ai_interpreter.py` is the only module that calls Gemini. It sends P50/P80/P95, on-time chance, the P95-P50 gap, and the top 5 drivers with O/M/P and correlation, and asks for JSON back: a short summary, 3 task-specific mitigations tied to each spread, and a buffer for ~80% confidence. If the key is missing, the call times out, or the JSON does not parse, the page still renders everything else with an "AI interpretation unavailable" note. The prompt and raw response are logged to `logs/ai_debug.log` for debugging.
 
 ## Run it
 
